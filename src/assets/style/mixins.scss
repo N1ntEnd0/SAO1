@@ -1,0 +1,172 @@
+@mixin flex-space-center(){
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+@mixin clear(){
+  background: none;
+  border: none;
+}
+@mixin non-space(){
+  margin: 0;
+  padding: 0;
+}
+@mixin button-shadow(){
+  background: $white-gray;
+  box-shadow: -4px -4px 20px #FFFFFF, 4px 4px 20px rgba(54, 84, 170, 0.1), inset 2px 2px 5px rgba(255, 255, 255, 0.5);
+}
+@mixin font-import($font){
+  src: url("../style/Gilroy-Font/Gilroy-"+ $font + ".ttf");
+  src: url("../style/Gilroy-Font/Gilroy-"+ $font + ".eot") format('eot'),
+  url("../style/Gilroy-Font/Gilroy-"+ $font + ".woff") format('woff');
+}
+@mixin flex-center(){
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+@mixin flexible-row(){
+  flex-direction: row;
+  display: flex;
+  align-items: center;
+}
+@mixin font-button($size){
+  font-family: $font-gilroy;
+  font-style: normal;
+  font-weight: 600;
+  font-size: $size;
+  line-height: 24px;
+  text-align: right;
+  color: #292929;
+}
+@mixin border-radius($radius){
+  border-radius: $radius;
+  -moz-border-radius: $radius;
+  -o-border-radius: $radius;
+  -webkit-border-radius: $radius;
+}
+@mixin bottom-border-radius(){
+  border-bottom-right-radius: 36px;
+  border-bottom-left-radius: 36px;
+  -webkit-border-bottom-left-radius: 36px;
+  -webkit-border-bottom-right-radius: 36px;
+  -moz-border-radius-bottomleft: 36px;
+  -moz-border-radius-bottomright: 36px;
+  -o-border-radius:36px
+}
+@mixin gray-gradient{
+  background-size: 300% 100%;
+  moz-transition: all .4s ease-in-out;
+  -o-transition: all .4s ease-in-out;
+  -webkit-transition: all .4s ease-in-out;
+  transition: all .4s ease-in-out;
+  background-image: linear-gradient(270deg, #959595 0%, rgba(196, 196, 196, 0.26) 50%, #959595 100%);
+}
+@mixin gray-gradient-hover{
+  background-position: 100% 0;
+  moz-transition: all .4s ease-in-out;
+  -o-transition: all .4s ease-in-out;
+  -webkit-transition: all .4s ease-in-out;
+  transition: all .4s ease-in-out;
+}
+
+@mixin blue-button{
+  background-size: 300% 100%;
+  moz-transition: all .4s ease-in-out;
+  -o-transition: all .4s ease-in-out;
+  -webkit-transition: all .4s ease-in-out;
+  transition: all .4s ease-in-out;
+  background-image:linear-gradient(270deg, #4088FF 0%, #40C9FF 50%, #4088FF 100% ) ;
+}
+@mixin blue-button-hover{
+  background-position: 100% 0;
+  moz-transition: all .4s ease-in-out;
+  -o-transition: all .4s ease-in-out;
+  -webkit-transition: all .4s ease-in-out;
+  transition: all .4s ease-in-out;
+}
+@mixin drop-shadow-soft(){
+  background: $white-gray;
+  box-shadow: 4px 4px 20px #FFFFFF, 4px 4px 20px rgba(54, 84, 170, 0.1), inset 2px 2px 5px rgba(255, 255, 255, 0.5);
+}
+@mixin drop-shadow-big_soft($plus){
+  @if($plus){
+    box-shadow: 30px 30px 80px rgba(55, 84, 170, 0.1), -30px -30px 80px #FFFFFF, inset 4px 4px 20px rgba(255, 255, 255, 0.5);
+  }
+  @else {
+    box-shadow: -30px -30px 80px rgba(55, 84, 170, 0.1), -30px -30px 80px #FFFFFF, inset 4px 4px 20px rgba(255, 255, 255, 0.5);
+  }
+}
+@mixin inner-shadow-soft(){box-shadow: 2px 2px 5px #FFFFFF, 4px 4px 20px rgba(54, 84, 170, 0.1), inset 2px 2px 5px rgba(255, 255, 255, 0.5);}
+@mixin inner-shadow-big_soft(){box-shadow: 4px 4px 20px rgba(55, 84, 170, 0.1), -30px -30px 80px #FFFFFF, inset 4px 4px 20px rgba(255, 255, 255, 0.5);}
+@mixin blue-drop-shadow(){filter: drop-shadow(4px 4px 10px rgba(64, 152, 255, 0.4));}
+@mixin shadow-light-dart(){box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);}
+@mixin shadow-heavy-dart(){box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.7);}
+@mixin background-elements-shadow(){box-shadow: -5px -5px 30px #FFFFFF, 5px 5px 30px rgba(55, 84, 170, 0.1), inset 4px 4px 20px rgba(255, 255, 255, 0.5);}
+@mixin button-layout($width, $radius){
+  @include clear();
+  @include border-radius($radius);
+  width: $width;
+  height: 52px;
+  @include drop-shadow-soft(true);
+}
+@mixin flex-start(){
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+@mixin font-setter($style,$weight,$size,$height,$color){
+  @if $weight == 100{
+    font-family: "Gilroy-Thin", sans-serif;
+  }
+  @if $weight == 200{
+    font-family: "Gilroy-UltraLight", sans-serif;
+  }
+  @if $weight == 300{
+    font-family: "Gilroy-Light", sans-serif;
+  }
+  @if $weight == 400{
+    font-family: "Gilroy-Regular", sans-serif;
+  }
+  @if $weight == 500{
+    font-family: "Gilroy-Medium", sans-serif;
+  }
+  @if $weight == 600{
+    font-family: "Gilroy-SemiBold", sans-serif;
+  }
+  @if $weight == 700{
+    font-family: "Gilroy-Bold", sans-serif;
+  }
+  @if $weight == 800{
+    font-family: "Gilroy-ExtraBold", sans-serif;
+  }
+  @if $weight == 900{
+    font-family: "Gilroy-Black", sans-serif;
+  }
+  @if $weight == bold{
+    font-family: "Gilroy-Bold", sans-serif;
+  }
+
+
+  @if $weight == normal {
+    font-family: "Gilroy-Regular", sans-serif;
+  }
+
+  font-style: $style;
+  font-weight: $weight;
+  font-size: $size;
+  line-height: $height;
+  color: $color;
+}
+$white-gray: #F1F3F6;
+$pseudo-white: #F6F7FA;
+$pseudo-black: #292929;
+$blue: #40C6FF;
+$blue-gradient: linear-gradient(270deg, #40C9FF 0%, #4088FF 100%);
+$black-gray: #4F4F4F;
+$white: #FFFFFF;
+$gray: #606060;
+$background: #F1F3F6;
+$font-gilroy: Gilroy;
+$error: #FF5050;
+$cursor: pointer;

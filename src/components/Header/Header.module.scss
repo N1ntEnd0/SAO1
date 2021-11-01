@@ -1,0 +1,52 @@
+@import '../../assets/style/mixins';
+
+.Header {
+  @include drop-shadow-soft();
+  background: #FFFFFF;
+  width: 100%;
+  height: 60px;
+  position: sticky;
+  z-index: 10;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 60px;
+  box-sizing: border-box;
+  &__title{
+    @include font-setter(normal, 700, 24px, 29px, #292929);
+    &__label{
+      margin-left: 10px;
+      @include font-setter(normal, 500, 19px, 21px, #292929);
+    }
+  }
+  &__menu{
+    @include flex-center();
+    & > *:not(:last-child) {
+      margin-right: 10px;
+    }
+    &__item{
+      @include clear();
+      @include border-radius(20px);
+      padding: 10px 20px;
+      @include font-setter(normal, 500, 19px, 21px, #292929);
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #F6F7FA;
+      box-shadow: -6px -6px 20px #FFFFFF, 4px 4px 20px rgba(54, 84, 170, 0.17), inset 2px 2px 5px rgba(255, 255, 255, 0.61);
+      border-radius: 12px;
+      &:hover{
+        @include blue-drop-shadow();
+      }
+      &_active{
+        @include blue-button();
+        color: #FFF;
+        font-weight: 700;
+        &:hover{
+          @include blue-button-hover();
+        }
+      }
+    }
+  }
+}

@@ -1,25 +1,22 @@
 import logo from './logo.svg';
 import './App.css';
+import {Header} from "./components/Header/Header";
+import {Modal} from "./components/Modal/Modal";
+import {useSelector} from "react-redux";
+import {Router} from "./components/Router/Router";
 
 function App() {
-  return (
+    const modal = useSelector(store => store.object.modal);
+
+    return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        {modal.visible &&
+            <Modal type={modal.type} />
+        }
+      <Header/>
+      <Router/>
     </div>
-  );
+    );
 }
 
 export default App;

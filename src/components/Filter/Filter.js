@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 
-export const Filt = (props) => {
+export const Filter = (props) => {
     return (
         <tr>
             <td><input type="text" value={props.id} onChange={(event) => props.handleId(event.target.value)}/></td>

@@ -4,8 +4,12 @@ import {toast, Toaster} from "react-hot-toast";
 import {PaginationList} from "../../paginationList/paginationList";
 import {countPage} from "../../Utils/countPage";
 import style from "../../paginationList/paginationList.scss"
+import {createJSON} from "../../Utils/createJSON";
+import {ALL, FILTER, SORT} from "../../Utils/modes";
+import {logDOM} from "@testing-library/react";
 
 export const ContentPage = () => {
+    const [mode, setMode] = useState("");
     const [content, setContent] = useState([]);
     const [id, setId] = useState("");
     const [name, setName] = useState("");
@@ -36,43 +40,100 @@ export const ContentPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(5);
     const [totalCount, setTotalCount] = useState(10);
-    const pagesCount = Math.ceil(totalCount/perPage)
-    const pages = []
+    const pagesCount = Math.ceil(totalCount/perPage);
+    const pages = [];
     countPage(pages, pagesCount, currentPage);
 
-    // const getPage = () => {
-    //     fetch(`http://localhost:8080/Lab1/all/city?page=${currentPage}&pageSize=${perPage}`)
-    //         .then(res => res.json())
-    //         .then(
-    //             (result) => {
-    //                 setContent(result);
-    //             }
-    //         )
-    // }
-                               
-    // useEffect(() => {
-    //             countPage(pages, pagesCount, currentPage);
-    // }, [content])
+    //todo delete
 
-    const getAll = () => {
-        fetch(`http://localhost:8080/Lab1/all/city`)
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    setContent(result)
-                    setTotalCount(result.length)
-                    countPage(pages, pagesCount, currentPage);
-                    // getPage();
-                }
-            )
-    }
+    useEffect(() => {
+        switch (mode) {
+            case ALL:
+                getAll();
+                break;
+            case FILTER:
+                sendFilter();
+                break;
+            case SORT:
+                sendSort();
+                break
+        }
+    }, [currentPage]);
 
     useEffect(() => {
         getAll();
     }, [])
 
     useEffect(() => {
-        let url = `http://localhost:8080/Lab1/all/city?sort&`
+        getOneCity();
+    }, [id])
+
+    useEffect(() => {
+        setMode(FILTER);
+        sendFilter();
+        // countPage(pages, pagesCount, currentPage);
+    }, [name, coordinate_x, coordinate_y, creationData, area, population, metersAboveSeaLevel, timezone, capital,
+        government, governor])
+
+    useEffect(() => {
+        setMode(SORT);
+        sendSort();
+    }, [sortStructure])
+
+    const getOneCity = () => {
+        fetch(`http://localhost:8080/Lab1/city/${id}`)
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    if (result.total > 0) {
+                        console.log(result.content);
+                        setContent(result.content);
+                        setTotalCount(result.total);
+                    } else {
+                        getAll();
+                    }
+                },
+                (err) => {
+                    setContent([]);
+                    setTotalCount(0);
+                }
+            )
+    }
+
+    const getAll = () => {
+        // fetch(`http://localhost:8080/Lab1/all/city`)
+        fetch(`http://localhost:8080/Lab1/all/city?page=${currentPage}&pageSize=${perPage}`)
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    setContent(result.content);
+                    setTotalCount(result.total);
+                },
+                (error) => {
+                    toast.error("Сервис сейчас недоступен");
+                }
+            )
+    }
+
+    const sendFilter = () => {
+        fetch(`http://localhost:8080/Lab1/all/city?page=${currentPage}&pageSize=${perPage}${createURL()}`)
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    if (perPage > result.total) {
+                        setCurrentPage(1);
+                    }
+                    setTotalCount(result.total);
+                    setContent(result.content);
+                },
+                (error) => {
+                    toast.error("Сервис сейчас недоступен");
+                }
+            )
+    }
+
+    const sendSort = () => {
+        let url = `http://localhost:8080/Lab1/all/city?page=${currentPage}&pageSize=${perPage}&sort&`
         for (let field in sortStructure) {
             if (sortStructure[field] === true) {
                 url += `${field}&`;
@@ -82,25 +143,173 @@ export const ContentPage = () => {
             .then(res => res.json())
             .then(
                 (result) => {
-                    setContent(result);
-                    countPage(pages, pagesCount, currentPage);
-                    // getPage();
+                    setTotalCount(result.total);
+                    setContent(result.content);
+                },
+                (error) => {
+                    toast.error("Сервис сейчас недоступен");
                 }
             )
-    }, [sortStructure])
+    }
+    //todo test
+    const deleteCity = (id) => {
+        if (id !== "") {
+            fetch(`http://localhost:8080/Lab1/city/${id}`,{
+                method: "DELETE",
+            })
+            .then(async (response) => {
+                if (
+                    Math.trunc(response.status / 100) === 4
+                    || Math.trunc(response.status / 100) === 5
+                    || response.status === 429
+                ) {
+                    toast.error(await response.text());
+                } else {
+                    toast.success("Удалено");
+                    sendFilter();
+                }
+            })
+            .catch((err) => {
+                toast.error("Сервис сейчас недоступен");
+            })
+            // .then(sendFilter)
+        }
+    }
 
-    useEffect(() => {
-        sendFilter();
-        countPage(pages, pagesCount, currentPage);
-    }, [id, name, coordinate_x, coordinate_y, creationData, area, population, metersAboveSeaLevel, timezone, capital,
-        government, governor])
+    const sendUpdate = (id, field, content) => {
+        fetch("http://localhost:8080/Lab1/city/", {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(createJSON(id, field, content))
+        })
+            .then(async (response) => {
+                if (
+                    Math.trunc(response.status / 100) === 4
+                    || Math.trunc(response.status / 100) === 5
+                    || response.status === 429
+                ) {
+                    toast.error(await response.text());
+                } else {
+                    toast.success("Изменено");
+                }
+            })
+    }
+    //todo test
+    const groupByName = () => {
+        fetch(`http://localhost:8080/Lab1/city/group`)
+            .then(async (response) => {
+                if (
+                    Math.trunc(response.status / 100) === 4
+                    || Math.trunc(response.status / 100) === 5
+                    || response.status === 429
+                ) {
+                    toast.error(await response.text());
+                } else {
+                    // setContent(await response.json());
+                    toast.success(await response.text());
+                }
+            })
+            .then(
+                (result) => {},
+                (error) => {
+                    toast.error("Сервис сейчас недоступен");
+                }
+            )
+    }
 
+    const getWithMaxArea = () => {
+        fetch(`http://localhost:8080/Lab1/city/area/max`)
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    setContent(result)
+                },
+                (error) => {
+                    toast.error("Сервис сейчас недоступен");
+                }
+            )
+        // .then(async (response) => {
+        //     if (
+        //         Math.trunc(response.status / 100) === 4
+        //         || Math.trunc(response.status / 100) === 5
+        //         || response.status === 429
+        //     ) {
+        //         toast.error(await response.text());
+        //     } else {
+        //         setContent(await response.json());
+        //     }
+        // })  // .then(async (response) => {
+        //     if (
+        //         Math.trunc(response.status / 100) === 4
+        //         || Math.trunc(response.status / 100) === 5
+        //         || response.status === 429
+        //     ) {
+        //         toast.error(await response.text());
+        //     } else {
+        //         setContent(await response.json());
+        //     }
+        // })
+    }
+
+    const deleteByCapital = () => {
+        if (capital != "") {
+            fetch(`http://localhost:8080/Lab1//delete/capital?capital=${capital}`, {
+                method: "DELETE"
+            })
+            .then(async (response) => {
+                if (
+                    Math.trunc(response.status / 100) === 4
+                    || Math.trunc(response.status / 100) === 5
+                    || response.status === 429
+                ) {
+                    toast.error(await response.text());
+                } else {
+                    toast.success("Удаленно");
+                }
+            })
+            .catch(
+                (error) => {
+                    toast.error("Сервис сейчас недоступен");
+                }
+            )
+        } else {
+            toast.error("Поле capital незаданно");
+        }
+    }
+    //todo test
+    const create = () => {
+        fetch("http://localhost:8080/Lab1/city/", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(city())
+        })
+            .then(async (response) => {
+                if (
+                    Math.trunc(response.status / 100) === 4
+                    || Math.trunc(response.status / 100) === 5
+                    || response.status === 429
+                ) {
+                    toast.error(await response.text());
+                } else {
+                    toast.success("Созданно");
+                    sendFilter();
+                }
+            })
+            .catch((err) => {
+                toast.error("Сервис сейчас недоступен");
+            })
+    }
 
     const createURL = () => {
-        let str = "?";
-        if (id !== ""){
-            str += `id=${id}&`
-        } if (name !== "") {
+        let str = "&";
+        // if (id !== ""){
+        //     str += `id=${id}&`
+        // }
+        if (name !== "") {
             str += `name=${name}&`
         } if (coordinate_x !== "") {
             str += `coordinates_x=${coordinate_x}&`;
@@ -126,17 +335,6 @@ export const ContentPage = () => {
         return str;
     }
 
-    const sendFilter = () => {
-        fetch(`http://localhost:8080/Lab1/all/city${createURL()}`)
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    setContent(result)
-                    // getPage();
-                }
-            )
-    }
-
     //todo return
     const city = () => {
         let c = {
@@ -155,9 +353,9 @@ export const ContentPage = () => {
                 name : governor
             }
         };
-
         return c;
     }
+
     const clearForm = () => {
         setId("");
         setName("");
@@ -173,200 +371,10 @@ export const ContentPage = () => {
         setGovernor("");
     }
 
-    const create = () => {
-        fetch("http://localhost:8080/Lab1/city/", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8'
-            },
-            body: JSON.stringify(city())
-        }).then(sendFilter);
-    }
-
-    const sendSort = (url) => {
-        fetch(url)
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    setContent(result);
-                }
-            )
-    }
-
-    const sort = (name, status) => {
-        setSortStructure({...sortStructure, [name]: status});
-
-    }
-
-
-
-    const deleteCity = (id) => {
-        if (id !== "") {
-            fetch("http://localhost:8080/Lab1/city",{
-                method: "DELETE",
-                headers: {
-                    'Content-Type': 'application/json;charset=utf-8'
-                },
-                body: JSON.stringify({
-                    "id": parseInt(id)
-                })
-            }).then(
-                (result) => {
-                }
-            ).then(sendFilter)
-        }
-    }
-
-    const createJSON = (id, field, content) => {
-
-        switch (field) {
-            case("name"):
-                return {
-                    id: id,
-                    name: content
-                }
-            case ("coordinate_x"):
-                return {
-                    id: id,
-                    coordinate_x: parseInt(content)
-                }
-            case ("coordinate_y"):
-                return {
-                    id: id,
-                    coordinate_y: parseFloat(content)
-                }
-            case ("area"):
-                return {
-                    id: id,
-                    area: parseInt(content)
-                }
-            case ("population"):
-                return {
-                    id: id,
-                    population: parseInt(content)
-                }
-            case ("metersAboveSeaLevel"):
-                return {
-                    id: id,
-                    metersAboveSeaLevel: parseInt(content)
-                }
-            case ("timezone"):
-                return {
-                    id: id,
-                    timezone: parseFloat(content)
-                }
-            case ("capital"):
-                return {
-                    id: id,
-                capital: Boolean(content)
-                }
-            case ("government"):
-                return {
-                    id: id,
-                    government: content
-                }
-            case ("governor"):
-                return {
-                    id: id,
-                    governor: content
-                }
-        }
-    }
-
-    const sendUpdate = (id, field, content) => {
-        fetch("http://localhost:8080/Lab1/city/", {
-            method: "PUT",
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8'
-            },
-            body: JSON.stringify(createJSON(id, field, content))
-        })
-        .then(async (response) => {
-            if (
-                Math.trunc(response.status / 100) === 4
-                || Math.trunc(response.status / 100) === 5
-                || response.status === 429
-            ) {
-                toast.error(await response.text());
-            } else {
-                toast.success("Изменено");
-            }
-        })
-    }
-
     const checkEnter = (e, id, field, content) => {
         if (e.key === 'Enter' || e.keyCode === 13) {
             sendUpdate(id, field, content)
         }
-    }
-
-    const deleteByCapital = () => {
-        console.log(capital);
-        if (capital != "") {
-            fetch(`http://localhost:8080/Lab1//delete/capital?capital=${capital}`, {
-                method: "DELETE"
-            })
-                .then(async (response) => {
-                    if (
-                        Math.trunc(response.status / 100) === 4
-                        || Math.trunc(response.status / 100) === 5
-                        || response.status === 429
-                    ) {
-                        toast.error(await response.text());
-                    } else {
-                        toast.success("Удаленно");
-                    }
-                })
-        } else {
-            toast.error("Поле capital незаданно");
-        }
-    }
-
-    const getWithMaxArea = () => {
-        fetch(`http://localhost:8080/Lab1/city/area/max`)
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    setContent(result)
-                }
-            )
-            // .then(async (response) => {
-            //     if (
-            //         Math.trunc(response.status / 100) === 4
-            //         || Math.trunc(response.status / 100) === 5
-            //         || response.status === 429
-            //     ) {
-            //         toast.error(await response.text());
-            //     } else {
-            //         setContent(await response.json());
-            //     }
-            // })  // .then(async (response) => {
-            //     if (
-            //         Math.trunc(response.status / 100) === 4
-            //         || Math.trunc(response.status / 100) === 5
-            //         || response.status === 429
-            //     ) {
-            //         toast.error(await response.text());
-            //     } else {
-            //         setContent(await response.json());
-            //     }
-            // })
-    }
-
-    const groupByName = () => {
-        fetch(`http://localhost:8080/Lab1/city/group`)
-            .then(async (response) => {
-                if (
-                    Math.trunc(response.status / 100) === 4
-                    || Math.trunc(response.status / 100) === 5
-                    || response.status === 429
-                ) {
-                    toast.error(await response.text());
-                } else {
-                    // setContent(await response.json());
-                    toast.success(await response.text());
-                }
-            })
     }
 
     return (
@@ -400,7 +408,7 @@ export const ContentPage = () => {
                 <td><input type="text" value={name} onChange={(event) => setName(event.target.value)}/></td>
                 <td><input type="text" value={coordinate_x} onChange={(event) => setCoordinateX(event.target.value)}/></td>
                 <td><input type="text" value={coordinate_y} onChange={(event) => setCoordinateY(event.target.value)}/></td>
-                <td><input type="date" value={creationData} onChange={(event) => setData(event.target.value)}/></td>
+                <td><input type="datetime-local" value={creationData} onChange={(event) => setData(event.target.value)}/></td>
                 <td><input type="text" value={area} onChange={(event) => setArea(event.target.value)}/></td>
                 <td><input type="text" value={population} onChange={(event) => setPopulation(event.target.value)}/></td>
                 <td><input type="text" value={metersAboveSeaLevel} onChange={(event) => setMASL(event.target.value)}/></td>
@@ -421,8 +429,8 @@ export const ContentPage = () => {
             </tr>
 
             <Content
-                current={currentPage}
-                perPage={perPage}
+                // current={currentPage}
+                // perPage={perPage}
                 sendUpdate={(id, name, content) => sendUpdate(id, name, content)}
                 checkEnter={(e, id, name, content) => checkEnter(e, id, name, content)}
                 onClick={(id) => deleteCity(id)}
@@ -437,9 +445,8 @@ export const ContentPage = () => {
                     onClick={() => {setCurrentPage(page)}}>{page}</span>)}
             </div>
         </div>
-);
+    );
 };
-
 
 
 

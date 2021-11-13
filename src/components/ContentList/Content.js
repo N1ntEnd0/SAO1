@@ -5,12 +5,13 @@ import {CellSelectorGovernment} from "./CellSelectorGovernment/CellSelectorGover
 
 export const Content = ({current, perPage, content, onClick, checkEnter, sendUpdate}) => {
 
-    let fromIndex = (current - 1) * perPage;
-    let page = content.slice(fromIndex, Math.min(fromIndex + perPage, content.length));
+    // let fromIndex = (current - 1) * perPage;
+    // let page = content.slice(fromIndex, Math.min(fromIndex + perPage, content.length));
 
     return (
 
-        page.map(item =>
+        // page.map(item =>
+        content.map(item =>
             <tr key={item.id}>
                 {/*<td>{item.id}</td>*/}
                 <td>{item.id}</td>
@@ -18,7 +19,15 @@ export const Content = ({current, perPage, content, onClick, checkEnter, sendUpd
                 <td><CellInput checkEnter={(e, content) => checkEnter(e, item.id, "name", content)} props={item.name} /></td>
                 <td><CellInput checkEnter={(e, content) => checkEnter(e, item.id, "coordinate_x", content)} props={item.coordinates.x} /></td>
                 <td><CellInput checkEnter={(e, content) => checkEnter(e, item.id, "coordinate_y", content)} props={item.coordinates.y} /></td>
-                <td>{Date(item.creationDate)}</td>
+                <td>{new Date(
+                    item.creationDate.date.year,
+                    item.creationDate.date.month-1,
+                    item.creationDate.date.day,
+                    item.creationDate.time.hour,
+                    item.creationDate.time.minute,
+                    item.creationDate.time.second,
+                ).toString()}
+                </td>
                 <td><CellInput checkEnter={(e, content) => checkEnter(e, item.id, "area", content)} props={item.area} /></td>
                 <td><CellInput checkEnter={(e, content) => checkEnter(e, item.id, "population", content)} props={item.population} /></td>
                 <td><CellInput checkEnter={(e, content) => checkEnter(e, item.id, "metersAboveSeaLevel", content)} props={item.metersAboveSeaLevel} /></td>
